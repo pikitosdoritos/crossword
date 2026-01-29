@@ -14,6 +14,9 @@ board = [
     {"word": "PRINT", "x": 7, "y": 4, "direction": "down", "hint": "It`s a function that outputs values to the console."},
 ]
 
+for item in board:
+    item["cells"] = {(x, y) for x in range(len(item["word"])) for y in range(len(item["word"]))}
+
 pg.init()
 screen = pg.display.set_mode((WIDTH, HEIGHT))
 clock = pg.time.Clock()
@@ -21,7 +24,6 @@ font = pg.font.SysFont("Arial", 20)
 font_hint = pg.font.SysFont("Arial", 14)
 grid = [[None for _ in range(COLS)] for _ in range(ROWS)]
 active_cell = None
-
 
 def get_hint(row, col, board):
     for item in board:
@@ -34,6 +36,7 @@ def get_hint(row, col, board):
             
             if ((y0 + dy, x0 + dx) == (row, col)):
                 return item["hint"]
+
     return None
 
 def show_hint(screen, text, x, y, font):
@@ -52,6 +55,16 @@ while running:
         if e.type == pg.QUIT:
             running = False
             
+        if e.type == pg.MOUSEBUTTONDOWN:
+            click_mx, click_my = e.pos
+            active_cell = (click_my // CELL, click_mx // CELL)
+            
+        if e.type == pg.KEYDOWN and active_cell:
+            row, col = active_cell
+            
+            if e.unicode.isalpha():
+                grid[row][col] = e.unicode.upper()
+                
     screen.fill((0, 0, 0))
 
     mx, my = pg.mouse.get_pos()
@@ -63,11 +76,22 @@ while running:
             shift_x = i * (item["direction"] == "right")
             shift_y = i * (item["direction"] == "down")
             x, y = item["x"] + shift_x, item["y"] + shift_y
-            # text = font.render(letter, True, (0, 0, 0))
-            # center_text = text.get_rect(center = (x * CELL + CELL // 2, y * CELL + CELL // 2))
             pg.draw.rect(screen, (255, 255, 255,), (x * CELL, y * CELL, CELL, CELL))
             pg.draw.rect(screen, (0, 0, 0,), (x * CELL, y * CELL, CELL + 1, CELL + 1), 1)
-            # screen.blit(text, center_text)
+            
+    for r in range(ROWS):
+        for c in range(COLS):
+            letter = grid[r][c]
+            if letter:
+                x = c * CELL
+                y = r * CELL
+                text = font.render(letter, True, (0, 0, 0))
+                center_text = text.get_rect(center = (x + CELL // 2, y + CELL // 2))
+                screen.blit(text, center_text)
+            
+    if active_cell:
+        r, c = active_cell
+        pg.draw.rect(screen, (0, 150, 255), (c * CELL, r * CELL, CELL, CELL), 2)
             
     hint = get_hint(row, col, board)
     
