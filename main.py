@@ -100,7 +100,10 @@ while running:
             
         if e.type == pg.MOUSEBUTTONDOWN:
             click_mx, click_my = e.pos
-            active_cell = (click_my // CELL, click_mx // CELL)
+            if (click_mx // CELL, click_my // CELL) in all_cells:
+                active_cell = (click_my // CELL, click_mx // CELL)
+            else:
+                active_cell = None
             
         if e.type == pg.KEYDOWN and active_cell:
             row, col = active_cell
@@ -134,11 +137,8 @@ while running:
                 screen.blit(text, center_text)
             
     if active_cell:
-        if active_cell not in all_cells:
-            active_cell = None
-        else:
-            r, c = active_cell
-            pg.draw.rect(screen, (0, 150, 255), (c * CELL, r * CELL, CELL, CELL), 2)
+        r, c = active_cell
+        pg.draw.rect(screen, (0, 150, 255), (c * CELL, r * CELL, CELL, CELL), 2)
             
     hint = get_hint(row, col, board)
     
