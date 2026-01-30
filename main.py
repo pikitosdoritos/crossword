@@ -21,6 +21,7 @@ font = pg.font.SysFont("Arial", 20)
 font_hint = pg.font.SysFont("Arial", 14)
 grid = [[None for _ in range(COLS)] for _ in range(ROWS)]
 active_cell = None
+all_cells = set()
 
 def get_hint(row, col, board):
     vert_hint = ""
@@ -79,7 +80,6 @@ def show_hint(screen, text, x, y, font):
         y_offset += surf.get_height() + line_gap
 
 def calc_cells():
-    all_cells = set()
     for item in board:
         item["cells"] = list()
         for i in range(len(item["word"])):
@@ -134,8 +134,11 @@ while running:
                 screen.blit(text, center_text)
             
     if active_cell:
-        r, c = active_cell
-        pg.draw.rect(screen, (0, 150, 255), (c * CELL, r * CELL, CELL, CELL), 2)
+        if active_cell not in all_cells:
+            active_cell = None
+        else:
+            r, c = active_cell
+            pg.draw.rect(screen, (0, 150, 255), (c * CELL, r * CELL, CELL, CELL), 2)
             
     hint = get_hint(row, col, board)
     
